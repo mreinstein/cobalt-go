@@ -9,7 +9,7 @@ import (
 	//"strings"
 	"time"
 
-	"reinstein.me/test/cobalt"
+	"github.com/mreinstein/cobalt-go/cobalt"
 
 	"github.com/cogentcore/webgpu/wgpu"
 	"github.com/go-gl/glfw/v3.3/glfw"

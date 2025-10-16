@@ -1,4 +1,4 @@
-module reinstein.me/test
+module github.com/mreinstein/cobalt-go
 
 go 1.25.1
 
