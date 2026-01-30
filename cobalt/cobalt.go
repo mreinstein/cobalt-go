@@ -21,6 +21,9 @@ type State struct {
 	Queue   *wgpu.Queue
 	Config  *wgpu.SurfaceConfiguration
 
+	// Reference to the GLFW window for framebuffer size queries
+	window *glfw.Window
+
 	// some nodes may need a reference to the default texture view (the frame backing)
 	// this is generated each frame
 	surfaceTexView *wgpu.TextureView
@@ -112,20 +115,24 @@ func Init(window *glfw.Window, viewportWidth int, viewportHeight int) (s *State,
 
 	caps := s.surface.GetCapabilities(s.adapter)
 
-	width, height := window.GetSize()
-
-	//fbw, fbh := window.GetFramebufferSize()
+	// Use GetFramebufferSize() for physical pixels, not GetSize() which returns logical points.
+	// On high-DPI displays (e.g., Retina), the framebuffer is larger than the logical window size.
+	// The swap chain must be configured with physical pixel dimensions to avoid blurry rendering.
+	fbWidth, fbHeight := window.GetFramebufferSize()
 
 	s.Config = &wgpu.SurfaceConfiguration{
 		Usage:       wgpu.TextureUsageRenderAttachment,
 		Format:      wgpu.TextureFormatBGRA8Unorm, //wgpu.TextureFormatRGBA16Float
-		Width:       uint32(width),
-		Height:      uint32(height),
+		Width:       uint32(fbWidth),
+		Height:      uint32(fbHeight),
 		PresentMode: wgpu.PresentModeFifo, //wgpu.PresentModeImmediate, // wgpu.PresentModeFifo,
 		AlphaMode:   caps.AlphaModes[0],
 	}
 
 	s.surface.Configure(s.adapter, s.Device, s.Config)
+
+	// Store window reference for framebuffer size queries during resize
+	s.window = window
 
 	return s, nil
 }
@@ -199,12 +206,17 @@ func SetViewportDimensions(c *State, width int, height int) {
 	fmt.Println("set viewport dims!", width, height)
 
 	if width > 0 && height > 0 {
-		c.Config.Width = uint32(width)
-		c.Config.Height = uint32(height)
+		// Get the actual framebuffer size (physical pixels) for the swap chain.
+		// On high-DPI displays, this is larger than the logical window size.
+		fbWidth, fbHeight := c.window.GetFramebufferSize()
 
-		fmt.Println("resized to", width, height)
+		c.Config.Width = uint32(fbWidth)
+		c.Config.Height = uint32(fbHeight)
+
+		fmt.Println("surface resized to physical pixels:", fbWidth, fbHeight)
 		c.surface.Configure(c.adapter, c.Device, c.Config)
 
+		// Store the game viewport dimensions (used for rendering calculations)
 		c.Viewport.width = width
 		c.Viewport.height = height
 		for _, n := range c.Nodes {

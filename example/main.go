@@ -47,18 +47,18 @@ func main() {
 
 	c.Viewport.Zoom = 1.0
 
-/*
-    fb := &cobalt.FrameBufferNode{
-    	Label: "fb test",
-		Format:   c.Config.Format,
-		//GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING
-		Usage:    wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst | wgpu.TextureUsageRenderAttachment,
-		MipCount: 1,
-    }
+	/*
+	       fb := &cobalt.FrameBufferNode{
+	       	Label: "fb test",
+	   		Format:   c.Config.Format,
+	   		//GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING
+	   		Usage:    wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst | wgpu.TextureUsageRenderAttachment,
+	   		MipCount: 1,
+	       }
 
-    _ = fb.Init(c)
-    c.Nodes = append(c.Nodes, fb)
-    */
+	       _ = fb.Init(c)
+	       c.Nodes = append(c.Nodes, fb)
+	*/
 
 	ta := &cobalt.TileAtlasNode{
 		TexturePath: "./assets/tileset.png",
@@ -81,7 +81,6 @@ func main() {
 		_ = tl.Init(c)
 		c.Nodes = append(c.Nodes, tl)
 	}
-	
 
 	ss := &cobalt.SpritesheetNode{
 		SpritesheetJsonPath: "./assets/spritesheet.json",
@@ -91,7 +90,7 @@ func main() {
 
 	err2 := ss.Init(c)
 	if err2 != nil {
-		panic(err)
+		panic(err2)
 	}
 	c.Nodes = append(c.Nodes, ss)
 
@@ -113,20 +112,19 @@ func main() {
 	// returns a unique spriteId that can be used to modify it later
 	sid := sn.AddSprite(c, "hero_idle_look_forward-0.png", [2]float32{2400.0, 1850.0}, [2]float32{1.0, 1.0}, [4]float32{0.0, 0.0, 1.0, 0.0}, 1.0, 0.0)
 
-/*
-	blit := &cobalt.BlitNode{
-		SourceFb: fb,
-	}
+	/*
+		blit := &cobalt.BlitNode{
+			SourceFb: fb,
+		}
 
-	err = blit.Init(c)
+		err = blit.Init(c)
 
-	if err != nil {
-		panic(err)
-	}
-	c.Nodes = append(c.Nodes, blit)
+		if err != nil {
+			panic(err)
+		}
+		c.Nodes = append(c.Nodes, blit)
 	*/
-	
-	
+
 	window.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		updateWindowSize(w, c, width, height)
 	})
@@ -273,20 +271,6 @@ func main() {
 
 func updateWindowSize(w *glfw.Window, c *cobalt.State, width, height int) {
 
-	//fbw, fbh := w.GetFramebufferSize() // physical pixels (use these for surface config & viewport)
-	//ww, wh := w.GetSize()              // logical points (do NOT use for surface config)
-	//sx, sy := w.GetContentScale()      // e.g., ~2.0 on Retina
-
-	//width = fbw
-	//height = fbh
-    //fmt.Println("passed dims:", width, height)
-	//fmt.Println("phsical pixels:", fbw, fbh)
-	//fmt.Println("logical points:", ww, wh)
-	//fmt.Println("scale:", sx, sy)
-
-	// aspectRatio := float64(height) / float64(width)
-	// idealHeight := idealWidth * aspectRatio
-
 	/*
 	     16:9    16:10     3:2
 	   480x270,  480x300, 480x320
@@ -294,10 +278,9 @@ func updateWindowSize(w *glfw.Window, c *cobalt.State, width, height int) {
 	           1792x1120
 	*/
 
-
 	width, height = w.GetSize() // logical points
 	idealWidth := 480.0
-	
+
 	// scaleFactor must be an integer because we get weird texture artifacts like blurring/shimmering/uneven
 	// lines when trying to render at certain float scale values (e.g., 3.0145833333333334)
 	scaleFactor := math.Round(float64(width) / idealWidth)
@@ -308,37 +291,11 @@ func updateWindowSize(w *glfw.Window, c *cobalt.State, width, height int) {
 
 	gameWidth := math.Round(float64(width) / scaleFactor)
 	gameHeight := math.Round(float64(height) / scaleFactor)
-    
 
-/*
-	// Pick your desired virtual/base size (or target aspect).
-	const idealW = 480
-	const idealH = 270 // pick something that matches your game’s aspect
-
-	// If you want to FILL the whole window with NO OFFSETS and accept stretch,
-	// use non-uniform integer scale:
-	scaleX := fbw/ idealW // integer division (floors)
-	scaleY := fbh / idealH
-	if scaleX < 1 { scaleX = 1 }
-	if scaleY < 1 { scaleY = 1 }
-
-	// Compute the game/canvas size so it divides the window EXACTLY.
-	gameWidth := fbw / scaleX  // exact integer
-	gameHeight := fbh / scaleY  // exact integer
-
-*/
-
-
-	fmt.Println("gw:", gameWidth, "gh:", gameHeight)
 	// renderer.canvasScale = scaleFactor
 	// c.Viewport.Zoom = int(scaleFactor)
 
 	cobalt.SetViewportDimensions(c, int(gameWidth), int(gameHeight))
-
-	//c.Config.Width  = uint32(fbw)
-    //c.Config.Height = uint32(fbh)
-    //c.Surface.Configure(c.Config)
-    //fmt.Println("weee..")
 }
 
 /*
